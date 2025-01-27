@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Memory Match Game</title>
+    <style>
+        body {
+            font-family: 'Arial Rounded MT Bold', sans-serif;
+            background: #f0f9ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .game-title {
+            color: #ff6b6b;
+            font-size: 2.5em;
+            margin: 20px 0;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 600px;
+            margin: 20px;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            background: #fff;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+            background: #ffd93d;
+        }
+
+        .card.matched {
+            background: #6c5ce7;
+            cursor: default;
+        }
+
+        .stats {
+            font-size: 1.2em;
+            margin: 15px 0;
+            color: #2d3436;
+        }
+
+        .restart-btn {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background: #ff7675;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <h1 class="game-title">Emoji Memory Match! 🧠</h1>
+    <div class="stats">Moves: <span id="moves">0</span></div>
+    <div class="game-grid" id="gameGrid"></div>
+    <button class="restart-btn" onclick="startGame()">New Game</button>
+
+    <script>
+        const emojis = ['🐶', '🐱', '🐻', '🦄', '🐸', '🐧', '🐙', '🐳'];
+        let flippedCards = [];
+        let moves = 0;
+        let matchedPairs = 0;
+
+        function createGame() {
+            const gameGrid = document.getElementById('gameGrid');
+            const doubledEmojis = [...emojis, ...emojis];
+
+            doubledEmojis.sort(() => Math.random() - 0.5);
+
+            gameGrid.innerHTML = doubledEmojis.map(emoji => `
+                <div class="card" onclick="flipCard(this)">
+                    <span style="display: none;">${emoji}</span>
+                </div>
+            `).join('');
+        }
+
+        function flipCard(card) {
+            if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
+                card.classList.add('flipped');
+                card.children[0].style.display = 'block';
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    moves++;
+                    document.getElementById('moves').textContent = moves;
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const emoji1 = card1.children[0].textContent;
+            const emoji2 = card2.children[0].textContent;
+
+            if (emoji1 === emoji2) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedPairs++;
+                if (matchedPairs === emojis.length) {
+                    setTimeout(() => alert(`You won in ${moves} moves! 🎉`), 300);
+                }
+                flippedCards = [];
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.children[0].style.display = 'none';
+                    card2.children[0].style.display = 'none';
+                    flippedCards = [];
+                }, 800);
+            }
+        }
+
+        function startGame() {
+            moves = 0;
+            matchedPairs = 0;
+            flippedCards = [];
+            document.getElementById('moves').textContent = '0';
+            createGame();
+        }
+
+        // Start the game when page loads
+        startGame();
+    </script>
+</body>
+</html>
